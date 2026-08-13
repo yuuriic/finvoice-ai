@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Controle financeiro com comandos de voz">
+    <title>FinVoice AI</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="#inicio" aria-label="FinVoice AI - início">
+        <span class="brand-mark">FV</span>
+        <span>FinVoice AI</span>
+    </a>
+    <nav aria-label="Navegação principal">
+        <a href="#inicio">Visão geral</a>
+        <a href="#transacoes">Transações</a>
+        <a href="#voz">Comando de voz</a>
+    </nav>
+</header>
+
+<main>
+    <section id="inicio" class="hero">
+        <div>
+            <p class="eyebrow">Seu dinheiro, em poucas palavras</p>
+            <h1>Controle financeiro simples e inteligente.</h1>
+            <p class="hero-copy">Registre receitas e despesas digitando ou falando. O FinVoice AI organiza tudo para você.</p>
+            <a class="button primary" href="#voz">Gravar um comando</a>
+        </div>
+        <div class="hero-card" aria-hidden="true">
+            <span class="pulse"><i></i><i></i><i></i><i></i><i></i></span>
+            <strong>“Gastei 50 reais no mercado hoje.”</strong>
+            <small>Comando reconhecido</small>
+        </div>
+    </section>
+
+    <section class="dashboard" aria-labelledby="resumo-title">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Visão geral</p>
+                <h2 id="resumo-title">Resumo financeiro</h2>
+            </div>
+            <button class="icon-button" id="refreshButton" type="button" title="Atualizar dados" aria-label="Atualizar dados">↻</button>
+        </div>
+        <div class="summary-grid">
+            <article class="summary-card balance">
+                <span>Saldo atual</span>
+                <strong id="balanceValue">R$ 0,00</strong>
+            </article>
+            <article class="summary-card income">
+                <span>Receitas</span>
+                <strong id="incomeValue">R$ 0,00</strong>
+            </article>
+            <article class="summary-card expense">
+                <span>Despesas</span>
+                <strong id="expenseValue">R$ 0,00</strong>
+            </article>
+        </div>
+        <div class="category-panel">
+            <h3>Resumo por categoria</h3>
+            <div id="categorySummary" class="category-list">
+                <p class="empty">Nenhuma categoria registrada.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="voz" class="voice-section" aria-labelledby="voice-title">
+        <div class="section-heading centered">
+            <div>
+                <p class="eyebrow">Assistente por voz</p>
+                <h2 id="voice-title">Fale naturalmente</h2>
+                <p>Exemplo: “Recebi 2 mil reais de salário hoje”.</p>
+            </div>
+        </div>
+        <div class="voice-card">
+            <div id="recordingIndicator" class="recording-indicator" hidden>
+                <span></span> Gravando <strong id="recordingTime">00:00</strong>
+            </div>
+            <button id="recordButton" class="record-button" type="button" aria-label="Iniciar gravação">
+                <span class="mic-icon">●</span>
+            </button>
+            <h3 id="recordingTitle">Toque para gravar</h3>
+            <p id="recordingHelp">O navegador pedirá acesso ao seu microfone.</p>
+            <audio id="audioPreview" controls hidden></audio>
+            <div id="recordingActions" class="recording-actions" hidden>
+                <button id="discardButton" class="button secondary" type="button">Descartar</button>
+                <button id="sendRecordingButton" class="button primary" type="button">Enviar gravação</button>
+            </div>
+            <div class="divider"><span>ou</span></div>
+            <label class="upload-button" for="audioFile">Escolher arquivo de áudio</label>
+            <input id="audioFile" type="file" accept="audio/*" hidden>
+            <small id="selectedFile">MP3, WAV, M4A ou WEBM — máximo de 25 MB</small>
+        </div>
+        <div id="voiceResult" class="voice-result" hidden aria-live="polite"></div>
+    </section>
+
+    <section id="transacoes" class="transactions-section" aria-labelledby="transactions-title">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Movimentações</p>
+                <h2 id="transactions-title">Transações</h2>
+            </div>
+            <button id="newTransactionButton" class="button primary" type="button">+ Nova transação</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th>Tipo</th><th>Valor</th><th><span class="sr-only">Ações</span></th></tr></thead>
+                <tbody id="transactionsBody"></tbody>
+            </table>
+            <p id="transactionsEmpty" class="empty">Ainda não há transações.</p>
+        </div>
+    </section>
+
+    <section class="history-section" aria-labelledby="history-title">
+        <div class="section-heading"><div><p class="eyebrow">Atividade</p><h2 id="history-title">Histórico de comandos</h2></div></div>
+        <div id="commandHistory" class="history-list"><p class="empty">Nenhum comando enviado.</p></div>
+    </section>
+</main>
+
+<dialog id="transactionDialog">
+    <form id="transactionForm">
+        <div class="dialog-heading">
+            <h2 id="dialogTitle">Nova transação</h2>
+            <button id="closeDialogButton" class="icon-button" type="button" aria-label="Fechar">×</button>
+        </div>
+        <input id="transactionId" type="hidden">
+        <label>Descrição<input id="description" required maxlength="120" placeholder="Ex.: Compras do mercado"></label>
+        <div class="form-row">
+            <label>Valor (R$)<input id="amount" type="number" required min="0.01" step="0.01" placeholder="0,00"></label>
+            <label>Tipo<select id="type" required><option value="EXPENSE">Despesa</option><option value="INCOME">Receita</option></select></label>
+        </div>
+        <div class="form-row">
+            <label>Categoria<input id="category" required maxlength="60" placeholder="Ex.: Alimentação"></label>
+            <label>Data<input id="transactionDate" type="date" required></label>
+        </div>
+        <div class="dialog-actions">
+            <button id="cancelDialogButton" class="button secondary" type="button">Cancelar</button>
+            <button class="button primary" type="submit">Salvar</button>
+        </div>
+    </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/js/app.js" defer></script>
+</body>
+</html>
