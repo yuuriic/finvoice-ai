@@ -1,25 +1,30 @@
 spring:
+  # Identificação usada pelo contexto e pelos logs do Spring Boot.
   application:
     name: voice-budget-ai
 
   datasource:
+    # Banco H2 persistido em arquivo para manter os dados entre reinicializações.
     url: jdbc:h2:file:./data/voicebudget;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
 
   jpa:
+    # O Hibernate atualiza o schema automaticamente a partir das entidades.
     hibernate:
       ddl-auto: update
     show-sql: false
     open-in-view: false
 
   h2:
+    # Console administrativo local, útil durante o desenvolvimento.
     console:
       enabled: true
       path: /h2-console
 
   servlet:
+    # Protege a aplicação contra uploads acima do limite aceito.
     multipart:
       max-file-size: 25MB
       max-request-size: 25MB
@@ -46,6 +51,7 @@ spring:
             response-format: mp3
 
 server:
+  # Porta em que frontend e API são servidos juntos.
   port: 8080
 
 logging:

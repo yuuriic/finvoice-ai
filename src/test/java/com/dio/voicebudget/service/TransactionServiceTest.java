@@ -23,9 +23,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+/** Testa regras financeiras isolando o serviço do banco com um repositório mockado. */
 class TransactionServiceTest {
 
     @Mock
+    // Mockito controla os retornos do repositório em cada cenário.
     private TransactionRepository repository;
 
     private TransactionService service;

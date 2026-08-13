@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+/** Converte exceções da aplicação em respostas HTTP consistentes para o frontend. */
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(TransactionNotFoundException.class)
@@ -41,6 +42,7 @@ public class GlobalExceptionHandler {
     }
 
     private Map<String, Object> body(HttpStatus status, String message) {
+        // Formato comum usado por todos os tratamentos de erro acima.
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", status.value());

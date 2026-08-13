@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+/** Centraliza as regras de negócio usadas tanto pela API quanto pelas ferramentas da IA. */
 public class TransactionService {
 
     private final TransactionRepository repository;
@@ -26,6 +27,7 @@ public class TransactionService {
     }
 
     @Transactional
+    /** Valida, converte o DTO em entidade e persiste uma nova movimentação. */
     public Transaction create(TransactionRequest request) {
         validate(request);
         Transaction transaction = new Transaction(
@@ -37,10 +39,15 @@ public class TransactionService {
         return repository.save(transaction);
     }
 
+    /** Retorna a transação ou lança uma exceção de domínio quando o ID não existe. */
     public Transaction findById(Long id) {
         return repository.findById(id).orElseThrow(() -> new TransactionNotFoundException(id));
     }
 
+    /**
+     * Aplica a combinação de filtros disponível e ordena o resultado da data
+     * mais recente para a mais antiga.
+     */
     public List<Transaction> findAll(TransactionType type, String category, LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions;
         if (startDate != null && endDate != null && type != null) {
@@ -55,6 +62,7 @@ public class TransactionService {
             transactions = repository.findAll();
         }
 
+        // Complementa em memória os casos nos quais categoria vem combinada a outro filtro.
         if (category != null && !category.isBlank()) {
             transactions = transactions.stream()
                     .filter(t -> t.getCategory().equalsIgnoreCase(category))
@@ -66,6 +74,7 @@ public class TransactionService {
     }
 
     @Transactional
+    /** Atualiza a entidade gerenciada; o JPA grava as mudanças ao concluir a transação. */
     public Transaction update(Long id, TransactionRequest request) {
         validate(request);
         Transaction transaction = findById(id);
@@ -78,11 +87,13 @@ public class TransactionService {
     }
 
     @Transactional
+    /** Exige que o registro exista antes de solicitar sua exclusão. */
     public void delete(Long id) {
         Transaction transaction = findById(id);
         repository.delete(transaction);
     }
 
+    /** Soma receitas e despesas e calcula o saldo, opcionalmente por período. */
     public BalanceResponse calculateBalance(LocalDate startDate, LocalDate endDate) {
         List<Transaction> transactions = (startDate != null && endDate != null)
                 ? repository.findByTransactionDateBetween(startDate, endDate)
@@ -93,6 +104,7 @@ public class TransactionService {
         return new BalanceResponse(income, expense, income.subtract(expense));
     }
 
+    /** Agrupa em memória os totais de entrada e saída de cada categoria. */
     public List<CategorySummaryResponse> summarizeByCategory() {
         Map<String, BigDecimal[]> totals = new LinkedHashMap<>();
         for (Transaction transaction : repository.findAll()) {
@@ -109,6 +121,7 @@ public class TransactionService {
                 .toList();
     }
 
+    /** Soma somente os valores pertencentes ao tipo solicitado. */
     private BigDecimal sumByType(List<Transaction> transactions, TransactionType type) {
         return transactions.stream()
                 .filter(t -> t.getType() == type)
@@ -116,6 +129,7 @@ public class TransactionService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    /** Reforça regras essenciais mesmo quando o serviço é chamado fora do controller. */
     private void validate(TransactionRequest request) {
         if (request.amount() == null || request.amount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("O valor da transacao deve ser maior que zero");

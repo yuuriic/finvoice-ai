@@ -5,10 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+/** Configura o cliente de chat utilizado para interpretar os comandos financeiros. */
 public class AiConfig {
 
     @Bean
     public ChatClient chatClient(ChatClient.Builder builder) {
+        // O prompt de sistema define o papel, o idioma e os limites de atuação da IA.
         return builder
                 .defaultSystem("""
                         Voce e um assistente financeiro por voz. Interprete o comando do usuario (que veio de uma \

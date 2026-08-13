@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+/** Verifica se as funções oferecidas ao LLM delegam corretamente ao serviço. */
 class TransactionToolsTest {
 
     @Mock

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/transactions")
+/** Expõe os endpoints HTTP do cadastro e dos relatórios financeiros. */
 public class TransactionController {
 
     private final TransactionService transactionService;
@@ -34,6 +35,7 @@ public class TransactionController {
     }
 
     @PostMapping
+    /** Cria uma transação e responde 201 com a localização do novo recurso. */
     public ResponseEntity<TransactionResponse> create(@Valid @RequestBody TransactionRequest request) {
         Transaction transaction = transactionService.create(request);
         TransactionResponse response = TransactionResponse.from(transaction);
@@ -41,6 +43,7 @@ public class TransactionController {
     }
 
     @GetMapping
+    /** Lista transações e aceita filtros opcionais por query string. */
     public List<TransactionResponse> list(
             @RequestParam(required = false) TransactionType type,
             @RequestParam(required = false) String category,
@@ -52,22 +55,26 @@ public class TransactionController {
     }
 
     @GetMapping("/{id}")
+    /** Consulta uma única movimentação pelo identificador. */
     public TransactionResponse getById(@PathVariable Long id) {
         return TransactionResponse.from(transactionService.findById(id));
     }
 
     @PutMapping("/{id}")
+    /** Substitui os dados editáveis de uma transação existente. */
     public TransactionResponse update(@PathVariable Long id, @Valid @RequestBody TransactionRequest request) {
         return TransactionResponse.from(transactionService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
+    /** Exclui o recurso e responde 204, sem corpo. */
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         transactionService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/balance")
+    /** Calcula totais e saldo geral ou de um intervalo de datas. */
     public BalanceResponse balance(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -75,6 +82,7 @@ public class TransactionController {
     }
 
     @GetMapping("/summary/by-category")
+    /** Agrupa receitas e despesas pelas categorias cadastradas. */
     public List<CategorySummaryResponse> summaryByCategory() {
         return transactionService.summarizeByCategory();
     }

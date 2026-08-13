@@ -1,3 +1,4 @@
+// Endereços centralizados para evitar repetir rotas em toda a interface.
 const api = {
   transactions: "/api/transactions",
   balance: "/api/transactions/balance",
@@ -6,6 +7,7 @@ const api = {
   history: "/api/assistant/voice-commands"
 };
 
+// Atalhos, formatadores brasileiros e estado compartilhado da gravação.
 const $ = (selector) => document.querySelector(selector);
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const dateFormat = new Intl.DateTimeFormat("pt-BR");
@@ -17,12 +19,14 @@ let timerInterval;
 let seconds = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Só acessa o DOM depois que toda a estrutura HTML estiver disponível.
   bindEvents();
   $("#transactionDate").max = today();
   loadDashboard();
 });
 
 function bindEvents() {
+  // Conecta os controles visuais às operações correspondentes.
   $("#refreshButton").addEventListener("click", loadDashboard);
   $("#newTransactionButton").addEventListener("click", () => openTransactionDialog());
   $("#closeDialogButton").addEventListener("click", closeTransactionDialog);
@@ -36,6 +40,7 @@ function bindEvents() {
 }
 
 async function request(url, options = {}) {
+  // Padroniza chamadas à API e transforma respostas de erro em exceções legíveis.
   const response = await fetch(url, options);
   if (!response.ok) {
     let message = `Erro ${response.status}`;
@@ -49,6 +54,7 @@ async function request(url, options = {}) {
 }
 
 async function loadDashboard() {
+  // Carrega blocos independentes em paralelo para reduzir o tempo de espera.
   $("#refreshButton").disabled = true;
   try {
     const [balance, transactions, categories, history] = await Promise.all([
@@ -66,12 +72,14 @@ async function loadDashboard() {
 }
 
 function renderBalance(data) {
+  // Converte os valores numéricos para o padrão monetário brasileiro.
   $("#balanceValue").textContent = money.format(data.balance || 0);
   $("#incomeValue").textContent = money.format(data.totalIncome || 0);
   $("#expenseValue").textContent = money.format(data.totalExpense || 0);
 }
 
 function renderTransactions(items) {
+  // Reconstrói a tabela com dados seguros e ações ligadas pelo ID.
   const body = $("#transactionsBody");
   body.innerHTML = "";
   $("#transactionsEmpty").hidden = items.length > 0;
@@ -90,18 +98,21 @@ function renderTransactions(items) {
 }
 
 function renderCategories(items) {
+  // Exibe os totais de entrada e saída agrupados pelo backend.
   const list = $("#categorySummary");
   if (!items.length) { list.innerHTML = '<p class="empty">Nenhuma categoria registrada.</p>'; return; }
   list.innerHTML = items.map((item) => `<article class="category-item"><strong>${escapeHtml(item.category)}</strong><small>Receitas: ${money.format(item.totalIncome || 0)}</small><small>Despesas: ${money.format(item.totalExpense || 0)}</small></article>`).join("");
 }
 
 function renderHistory(items) {
+  // Apresenta a auditoria do comando mais recente para o mais antigo.
   const list = $("#commandHistory");
   if (!items.length) { list.innerHTML = '<p class="empty">Nenhum comando enviado.</p>'; return; }
   list.innerHTML = items.map((item) => `<article class="history-item"><div><strong>${item.success ? "Comando processado" : "Falha no comando"}</strong><time>${new Date(item.createdAt).toLocaleString("pt-BR")}</time></div><p>${escapeHtml(item.transcribedText || item.errorMessage || "Sem transcrição")}</p></article>`).join("");
 }
 
 function openTransactionDialog(transaction = null) {
+  // Sem argumento, abre o formulário vazio; com argumento, entra no modo edição.
   $("#transactionForm").reset();
   $("#transactionId").value = transaction?.id || "";
   $("#dialogTitle").textContent = transaction ? "Editar transação" : "Nova transação";
@@ -116,6 +127,7 @@ function openTransactionDialog(transaction = null) {
 function closeTransactionDialog() { $("#transactionDialog").close(); }
 
 async function saveTransaction(event) {
+  // O mesmo formulário escolhe POST ou PUT conforme a presença de um ID.
   event.preventDefault();
   const id = $("#transactionId").value;
   const payload = {
@@ -133,6 +145,7 @@ async function saveTransaction(event) {
 }
 
 async function handleTransactionAction(event) {
+  // Delegação de eventos permite tratar todos os botões de uma tabela dinâmica.
   const button = event.target.closest("[data-action]");
   if (!button) return;
   const transaction = JSON.parse(button.closest("tr").dataset.transaction);
@@ -146,6 +159,7 @@ async function handleTransactionAction(event) {
 }
 
 async function toggleRecording() {
+  // Um único botão alterna entre iniciar e encerrar a captura do microfone.
   if (mediaRecorder?.state === "recording") return stopRecording();
   if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
     return toast("Este navegador não oferece suporte à gravação de áudio.", true);
@@ -165,12 +179,14 @@ async function toggleRecording() {
 }
 
 function stopRecording() {
+  // Encerra tanto o gravador quanto as trilhas físicas do microfone.
   mediaRecorder.stop();
   mediaStream?.getTracks().forEach((track) => track.stop());
   setRecordingState(false);
 }
 
 function finishRecording() {
+  // Junta os fragmentos emitidos pelo MediaRecorder e cria uma URL de prévia local.
   recordedBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
   $("#audioPreview").src = URL.createObjectURL(recordedBlob);
   $("#audioPreview").hidden = false;
@@ -194,6 +210,7 @@ function updateTimer() {
 }
 
 function resetRecording() {
+  // Libera a URL temporária e devolve os controles ao estado inicial.
   if ($("#audioPreview").src) URL.revokeObjectURL($("#audioPreview").src);
   recordedBlob = null;
   $("#audioPreview").removeAttribute("src");
@@ -204,6 +221,7 @@ function resetRecording() {
 }
 
 function handleFileSelection(event) {
+  // O upload é uma alternativa à gravação feita dentro do navegador.
   const file = event.target.files[0];
   if (!file) return;
   $("#selectedFile").textContent = file.name;
@@ -212,6 +230,7 @@ function handleFileSelection(event) {
 }
 
 async function sendAudio(blob, filename) {
+  // FormData produz o multipart/form-data esperado pelo controller Spring.
   if (!blob) return;
   const form = new FormData();
   form.append("audio", blob, filename);
@@ -242,6 +261,7 @@ function recordingFilename() {
 
 function today() { return new Date().toISOString().slice(0, 10); }
 function escapeHtml(value = "") { const node = document.createElement("div"); node.textContent = value; return node.innerHTML; }
+// A função acima neutraliza HTML vindo da API antes de inseri-lo na página.
 function toast(message, error = false) {
   const element = $("#toast");
   element.textContent = message;

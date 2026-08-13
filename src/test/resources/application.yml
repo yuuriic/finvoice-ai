@@ -1,4 +1,5 @@
 spring:
+  # Configuração isolada usada apenas pela suíte automatizada.
   datasource:
     url: jdbc:h2:mem:voicebudget-test;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver

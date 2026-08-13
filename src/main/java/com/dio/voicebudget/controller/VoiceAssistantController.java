@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/assistant")
+/** Recebe áudios do frontend e expõe o histórico do assistente financeiro. */
 public class VoiceAssistantController {
 
     private final VoiceAssistantService voiceAssistantService;
@@ -28,18 +29,21 @@ public class VoiceAssistantController {
     }
 
     @PostMapping(value = "/voice-commands", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    /** Processa o campo multipart "audio" e devolve transcrição e resposta em JSON. */
     public VoiceCommandResponse handleVoiceCommand(@RequestParam("audio") MultipartFile audio) {
         return voiceAssistantService.processVoiceCommand(audio);
     }
 
     @PostMapping(value = "/voice-commands/speech", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = "audio/mpeg")
+    /** Executa o comando e converte a resposta textual do assistente em MP3. */
     public byte[] handleVoiceCommandWithSpeech(@RequestParam("audio") MultipartFile audio) {
         VoiceCommandResponse response = voiceAssistantService.processVoiceCommand(audio);
         return voiceAssistantService.synthesizeSpeech(response.assistantReply());
     }
 
     @GetMapping("/voice-commands")
+    /** Lista os comandos mais recentes; o limite padrão evita respostas muito grandes. */
     public List<VoiceCommandHistoryResponse> history(@RequestParam(defaultValue = "20") int limit) {
         return voiceCommandLogRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(0, limit)).stream()
                 .map(VoiceCommandHistoryResponse::from)

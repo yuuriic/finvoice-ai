@@ -25,12 +25,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TransactionController.class)
+/** Teste de fatia web: valida rotas, status e JSON sem iniciar banco ou IA. */
 class TransactionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
+    // Substitui a regra real para que o teste avalie apenas o comportamento HTTP.
     private TransactionService transactionService;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());

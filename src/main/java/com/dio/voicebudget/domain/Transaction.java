@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Entity
 @Table(name = "transactions")
 @EntityListeners(AuditingEntityListener.class)
+/** Entidade JPA que representa uma receita ou despesa persistida no banco. */
 public class Transaction {
 
     @Id
@@ -42,14 +43,17 @@ public class Transaction {
     private LocalDate transactionDate;
 
     @CreatedDate
+    // Preenchido pelo mecanismo de auditoria apenas na inclusão do registro.
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    // Atualizado automaticamente sempre que a entidade sofre uma alteração.
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     protected Transaction() {
+        // Construtor sem argumentos exigido pelo JPA; não faz parte da API pública.
     }
 
     public Transaction(String description, BigDecimal amount, TransactionType type, String category,
