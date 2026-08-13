@@ -1,4 +1,4 @@
-# 💰 Finvoice AI
+# 💰 FinVoice AI
 
 > API de controle financeiro com assistente de voz, construída com Spring Boot, Spring AI e Groq.
 
@@ -9,13 +9,16 @@
   <img alt="Maven" src="https://img.shields.io/badge/Maven-3.9+-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white">
 </p>
 
-O **Finvoice AI** recebe comandos de voz, transcreve o áudio, interpreta a intenção do usuário e executa operações reais sobre suas transações financeiras. Também oferece uma API REST completa para cadastrar, consultar, atualizar e excluir receitas e despesas.
+O **FinVoice AI** recebe comandos de voz, transcreve o áudio, interpreta a intenção do usuário e executa operações reais sobre suas transações financeiras. A aplicação inclui uma interface web responsiva e uma API REST completa para cadastrar, consultar, atualizar e excluir receitas e despesas.
 
 Projeto desenvolvido para o desafio da trilha [Spring Boot Learning Track — Spring AI](https://github.com/digitalinnovationone/dio-spring-boot-learning-track/blob/main/05-spring-ai/README.md), da DIO.
 
 ## ✨ Principais recursos
 
 - CRUD completo de receitas e despesas;
+- interface web responsiva integrada ao Spring Boot;
+- gravação de comandos diretamente pelo microfone do navegador;
+- envio de arquivos de áudio MP3, WAV, M4A ou WEBM;
 - filtros por tipo, categoria e período;
 - cálculo de saldo e resumo por categoria;
 - comandos financeiros por áudio;
@@ -123,7 +126,28 @@ mvn clean test
 mvn spring-boot:run
 ```
 
-A API estará disponível em [http://localhost:8080](http://localhost:8080).
+A interface web e a API estarão disponíveis em [http://localhost:8080](http://localhost:8080).
+
+Abra esse endereço no navegador e mantenha o terminal em execução. Na primeira gravação, o navegador solicitará permissão para acessar o microfone.
+
+## 🎙️ Interface web
+
+A página inicial do **FinVoice AI** permite:
+
+- acompanhar saldo, receitas e despesas;
+- visualizar o resumo por categoria;
+- cadastrar, editar e excluir transações;
+- gravar um comando usando o microfone do navegador;
+- ouvir a gravação antes de enviá-la;
+- descartar e refazer uma gravação;
+- selecionar um arquivo de áudio existente no computador;
+- consultar o histórico dos comandos processados.
+
+Para gravar, acesse [http://localhost:8080](http://localhost:8080), clique em **Gravar um comando**, permita o uso do microfone, fale o comando e encerre a gravação. Depois, confira a prévia e clique em **Enviar gravação**.
+
+Como alternativa, use **Escolher arquivo de áudio**. O frontend envia tanto a gravação quanto o arquivo selecionado no campo `audio` do endpoint `POST /api/assistant/voice-commands`.
+
+> O microfone funciona normalmente em `localhost`. Em uma publicação na internet, o navegador geralmente exige HTTPS para permitir a captura de áudio.
 
 ### Executar pelo JAR
 
@@ -325,6 +349,10 @@ src/
 │   │   ├── repository/   # Repositórios Spring Data JPA
 │   │   └── service/      # Regras de negócio e ferramentas da IA
 │   └── resources/
+│       ├── static/
+│       │   ├── index.html   # Interface web do FinVoice AI
+│       │   ├── css/         # Estilos responsivos
+│       │   └── js/          # Integração com a API e microfone
 │       └── application.yml
 └── test/                 # Testes automatizados
 ```
